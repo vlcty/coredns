@@ -6,7 +6,7 @@ import "github.com/caddyserver/caddy"
 func Register(name string, action SetupFunc) {
 	caddy.RegisterPlugin(name, caddy.Plugin{
 		ServerType: "dns",
-		Action:     func(c *caddy.Controller) error { return action(c) },
+		Action:     func(c *caddy.Controller) error { return action(&Controller{c}) },
 	})
 }
 
