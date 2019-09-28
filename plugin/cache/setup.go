@@ -10,15 +10,13 @@ import (
 	"github.com/coredns/coredns/plugin/metrics"
 	"github.com/coredns/coredns/plugin/pkg/cache"
 	clog "github.com/coredns/coredns/plugin/pkg/log"
-
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("cache")
 
 func init() { plugin.Register("cache", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	ca, err := cacheParse(c)
 	if err != nil {
 		return plugin.Error("cache", err)
@@ -38,7 +36,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func cacheParse(c *caddy.Controller) (*Cache, error) {
+func cacheParse(c *plugin.Controller) (*Cache, error) {
 	ca := New()
 
 	j := 0
