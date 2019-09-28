@@ -6,13 +6,11 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("errors", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	handler, err := errorsParse(c)
 	if err != nil {
 		return plugin.Error("errors", err)
@@ -31,7 +29,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func errorsParse(c *caddy.Controller) (*errorHandler, error) {
+func errorsParse(c *plugin.Controller) (*errorHandler, error) {
 	handler := newErrorHandler()
 
 	i := 0
@@ -61,7 +59,7 @@ func errorsParse(c *caddy.Controller) (*errorHandler, error) {
 	return handler, nil
 }
 
-func parseBlock(c *caddy.Controller, h *errorHandler) error {
+func parseBlock(c *plugin.Controller, h *errorHandler) error {
 	if c.Val() != "consolidate" {
 		return c.SyntaxErr("consolidate")
 	}

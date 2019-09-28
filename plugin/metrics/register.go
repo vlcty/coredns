@@ -2,13 +2,13 @@ package metrics
 
 import (
 	"github.com/coredns/coredns/core/dnsserver"
+	"github.com/coredns/coredns/plugin"
 
-	"github.com/caddyserver/caddy"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 // MustRegister registers the prometheus Collectors when the metrics plugin is used.
-func MustRegister(c *caddy.Controller, cs ...prometheus.Collector) {
+func MustRegister(c *plugin.Controller, cs ...prometheus.Collector) {
 	m := dnsserver.GetConfig(c).Handler("prometheus")
 	if m == nil {
 		return

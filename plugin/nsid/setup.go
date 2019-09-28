@@ -6,13 +6,11 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("nsid", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	nsid, err := nsidParse(c)
 	if err != nil {
 		return plugin.Error("nsid", err)
@@ -25,7 +23,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func nsidParse(c *caddy.Controller) (string, error) {
+func nsidParse(c *plugin.Controller) (string, error) {
 	// Use hostname as the default
 	nsid, err := os.Hostname()
 	if err != nil {

@@ -15,14 +15,12 @@ import (
 	"errors"
 
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 // removed has the names of the plugins that need to error on startup.
 var removed = []string{""}
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	c.Next()
 	x := c.Val()
 	return plugin.Error(x, errors.New("this plugin has been deprecated"))

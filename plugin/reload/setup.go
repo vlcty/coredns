@@ -25,7 +25,7 @@ var (
 	once, shutOnce sync.Once
 )
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	c.Next() // 'reload'
 	args := c.RemainingArgs()
 

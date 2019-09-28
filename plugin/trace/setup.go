@@ -7,13 +7,11 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("trace", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	t, err := traceParse(c)
 	if err != nil {
 		return plugin.Error("trace", err)
@@ -29,7 +27,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func traceParse(c *caddy.Controller) (*trace, error) {
+func traceParse(c *plugin.Controller) (*trace, error) {
 	var (
 		tr  = &trace{every: 1, serviceName: defServiceName}
 		err error

@@ -6,13 +6,11 @@ import (
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/pkg/tls"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("tls", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	err := parseTLS(c)
 	if err != nil {
 		return plugin.Error("tls", err)
@@ -37,7 +35,7 @@ func setTLSDefaults(tls *ctls.Config) {
 	tls.PreferServerCipherSuites = true
 }
 
-func parseTLS(c *caddy.Controller) error {
+func parseTLS(c *plugin.Controller) error {
 	config := dnsserver.GetConfig(c)
 
 	if config.TLSConfig != nil {

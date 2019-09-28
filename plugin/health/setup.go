@@ -7,13 +7,11 @@ import (
 
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/metrics"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("health", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	addr, lame, err := parse(c)
 	if err != nil {
 		return plugin.Error("health", err)
@@ -35,7 +33,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (string, time.Duration, error) {
+func parse(c *plugin.Controller) (string, time.Duration, error) {
 	addr := ""
 	dur := time.Duration(0)
 	for c.Next() {

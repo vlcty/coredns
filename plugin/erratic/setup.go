@@ -7,13 +7,11 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("erratic", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	e, err := parseErratic(c)
 	if err != nil {
 		return plugin.Error("erratic", err)
@@ -26,7 +24,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parseErratic(c *caddy.Controller) (*Erratic, error) {
+func parseErratic(c *plugin.Controller) (*Erratic, error) {
 	e := &Erratic{drop: 2}
 	drop := false // true if we've seen the drop keyword
 

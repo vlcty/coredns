@@ -7,13 +7,12 @@ import (
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/metrics"
 
-	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 )
 
 func init() { plugin.Register("autopath", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	ap, mw, err := autoPathParse(c)
 	if err != nil {
 		return plugin.Error("autopath", err)
@@ -46,7 +45,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func autoPathParse(c *caddy.Controller) (*AutoPath, string, error) {
+func autoPathParse(c *plugin.Controller) (*AutoPath, string, error) {
 	ap := &AutoPath{}
 	mw := ""
 

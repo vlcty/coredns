@@ -4,15 +4,13 @@ import (
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
 	clog "github.com/coredns/coredns/plugin/pkg/log"
-
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("rewrite")
 
 func init() { plugin.Register("rewrite", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	rewrites, err := rewriteParse(c)
 	if err != nil {
 		return plugin.Error("rewrite", err)
@@ -25,7 +23,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func rewriteParse(c *caddy.Controller) ([]Rule, error) {
+func rewriteParse(c *plugin.Controller) ([]Rule, error) {
 	var rules []Rule
 
 	for c.Next() {

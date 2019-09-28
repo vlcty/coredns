@@ -15,7 +15,6 @@ import (
 	"github.com/coredns/coredns/plugin/pkg/parse"
 	"github.com/coredns/coredns/plugin/pkg/upstream"
 
-	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -36,7 +35,7 @@ var log = clog.NewWithPlugin("kubernetes")
 
 func init() { plugin.Register("kubernetes", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	klog.SetOutput(os.Stdout)
 
 	k, err := kubernetesParse(c)
@@ -65,8 +64,8 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-// RegisterKubeCache registers KubeCache start and stop functions with Caddy
-func (k *Kubernetes) RegisterKubeCache(c *caddy.Controller) {
+// RegisterKubeCache registers KubeCache start and stop functions.
+func (k *Kubernetes) RegisterKubeCache(c *plugin.Controller) {
 	c.OnStartup(func() error {
 		go k.APIConn.Run()
 
@@ -89,7 +88,7 @@ func (k *Kubernetes) RegisterKubeCache(c *caddy.Controller) {
 	})
 }
 
-func kubernetesParse(c *caddy.Controller) (*Kubernetes, error) {
+func kubernetesParse(c *plugin.Controller) (*Kubernetes, error) {
 	var (
 		k8s *Kubernetes
 		err error
@@ -111,7 +110,7 @@ func kubernetesParse(c *caddy.Controller) (*Kubernetes, error) {
 }
 
 // ParseStanza parses a kubernetes stanza
-func ParseStanza(c *caddy.Controller) (*Kubernetes, error) {
+func ParseStanza(c *plugin.Controller) (*Kubernetes, error) {
 
 	k8s := New([]string{""})
 	k8s.autoPathSearch = searchFromResolvConf()

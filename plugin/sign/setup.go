@@ -8,13 +8,11 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("sign", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	sign, err := parse(c)
 	if err != nil {
 		return plugin.Error("sign", err)
@@ -38,7 +36,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (*Sign, error) {
+func parse(c *plugin.Controller) (*Sign, error) {
 	sign := &Sign{}
 	config := dnsserver.GetConfig(c)
 

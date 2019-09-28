@@ -12,14 +12,13 @@ import (
 	azuredns "github.com/Azure/azure-sdk-for-go/profiles/latest/dns/mgmt/dns"
 	azurerest "github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("azure")
 
 func init() { plugin.Register("azure", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	env, keys, fall, err := parse(c)
 	if err != nil {
 		return plugin.Error("azure", err)
@@ -47,7 +46,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (auth.EnvironmentSettings, map[string][]string, fall.F, error) {
+func parse(c *plugin.Controller) (auth.EnvironmentSettings, map[string][]string, fall.F, error) {
 	resourceGroupMapping := map[string][]string{}
 	resourceGroupSet := map[string]struct{}{}
 	azureEnv := azurerest.PublicCloud

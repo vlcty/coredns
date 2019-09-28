@@ -8,15 +8,13 @@ import (
 	"github.com/coredns/coredns/plugin/dnstap/dnstapio"
 	clog "github.com/coredns/coredns/plugin/pkg/log"
 	"github.com/coredns/coredns/plugin/pkg/parse"
-
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("dnstap")
 
 func init() { plugin.Register("dnstap", wrapSetup) }
 
-func wrapSetup(c *caddy.Controller) error {
+func wrapSetup(c *plugin.Controller) error {
 	if err := setup(c); err != nil {
 		return plugin.Error("dnstap", err)
 	}
@@ -29,7 +27,7 @@ type config struct {
 	full   bool
 }
 
-func parseConfig(d *caddy.Controller) (c config, err error) {
+func parseConfig(d *plugin.Controller) (c config, err error) {
 	d.Next() // directive name
 
 	if !d.Args(&c.target) {
@@ -54,7 +52,7 @@ func parseConfig(d *caddy.Controller) (c config, err error) {
 	return
 }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	conf, err := parseConfig(c)
 	if err != nil {
 		return err

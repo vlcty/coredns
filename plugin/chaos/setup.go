@@ -13,7 +13,7 @@ import (
 
 func init() { plugin.Register("chaos", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	version, authors, err := parse(c)
 	if err != nil {
 		return plugin.Error("chaos", err)
@@ -26,7 +26,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (string, []string, error) {
+func parse(c *plugin.Controller) (string, []string, error) {
 	// Set here so we pick up AppName and AppVersion that get set in coremain's init().
 	chaosVersion = caddy.AppName + "-" + caddy.AppVersion
 	version := ""

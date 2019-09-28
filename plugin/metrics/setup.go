@@ -10,8 +10,6 @@ import (
 	"github.com/coredns/coredns/plugin/metrics/vars"
 	clog "github.com/coredns/coredns/plugin/pkg/log"
 	"github.com/coredns/coredns/plugin/pkg/uniq"
-
-	"github.com/caddyserver/caddy"
 )
 
 var (
@@ -22,7 +20,7 @@ var (
 
 func init() { plugin.Register("prometheus", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	m, err := parse(c)
 	if err != nil {
 		return plugin.Error("prometheus", err)
@@ -71,7 +69,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (*Metrics, error) {
+func parse(c *plugin.Controller) (*Metrics, error) {
 	met := New(defaultAddr)
 
 	i := 0

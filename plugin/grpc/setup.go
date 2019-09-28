@@ -9,13 +9,11 @@ import (
 	"github.com/coredns/coredns/plugin/metrics"
 	"github.com/coredns/coredns/plugin/pkg/parse"
 	pkgtls "github.com/coredns/coredns/plugin/pkg/tls"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("grpc", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	g, err := parseGRPC(c)
 	if err != nil {
 		return plugin.Error("grpc", err)
@@ -38,7 +36,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parseGRPC(c *caddy.Controller) (*GRPC, error) {
+func parseGRPC(c *plugin.Controller) (*GRPC, error) {
 	var (
 		g   *GRPC
 		err error
@@ -57,7 +55,7 @@ func parseGRPC(c *caddy.Controller) (*GRPC, error) {
 	return g, nil
 }
 
-func parseStanza(c *caddy.Controller) (*GRPC, error) {
+func parseStanza(c *plugin.Controller) (*GRPC, error) {
 	g := newGRPC()
 
 	if !c.Args(&g.from) {
@@ -98,7 +96,7 @@ func parseStanza(c *caddy.Controller) (*GRPC, error) {
 	return g, nil
 }
 
-func parseBlock(c *caddy.Controller, g *GRPC) error {
+func parseBlock(c *plugin.Controller, g *GRPC) error {
 
 	switch c.Val() {
 	case "except":

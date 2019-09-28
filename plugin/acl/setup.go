@@ -8,7 +8,6 @@ import (
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/metrics"
 
-	"github.com/caddyserver/caddy"
 	"github.com/infobloxopen/go-trees/iptree"
 	"github.com/miekg/dns"
 )
@@ -24,7 +23,7 @@ func newDefaultFilter() *iptree.Tree {
 	return defaultFilter
 }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	a, err := parse(c)
 	if err != nil {
 		return plugin.Error("acl", err)
@@ -43,7 +42,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (ACL, error) {
+func parse(c *plugin.Controller) (ACL, error) {
 	a := ACL{}
 	for c.Next() {
 		r := rule{}

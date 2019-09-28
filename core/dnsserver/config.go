@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 // Config configuration for a single server.
@@ -59,7 +57,7 @@ func keyForConfig(blocIndex int, blocKeyIndex int) string {
 
 // GetConfig gets the Config that corresponds to c.
 // If none exist nil is returned.
-func GetConfig(c *caddy.Controller) *Config {
+func GetConfig(c *plugin.Controller) *Config {
 	ctx := c.Context().(*dnsContext)
 	key := keyForConfig(c.ServerBlockIndex, c.ServerBlockKeyIndex)
 	if cfg, ok := ctx.keysToConfigs[key]; ok {

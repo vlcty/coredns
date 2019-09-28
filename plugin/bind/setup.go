@@ -6,11 +6,9 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	config := dnsserver.GetConfig(c)
 
 	// addresses will be consolidated over all BIND directives available in that BlocServer

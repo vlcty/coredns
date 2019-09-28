@@ -8,13 +8,12 @@ import (
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/pkg/upstream"
 
-	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 )
 
 func init() { plugin.Register("template", setupTemplate) }
 
-func setupTemplate(c *caddy.Controller) error {
+func setupTemplate(c *plugin.Controller) error {
 	handler, err := templateParse(c)
 	if err != nil {
 		return plugin.Error("template", err)
@@ -32,7 +31,7 @@ func setupTemplate(c *caddy.Controller) error {
 	return nil
 }
 
-func templateParse(c *caddy.Controller) (handler Handler, err error) {
+func templateParse(c *plugin.Controller) (handler Handler, err error) {
 	handler.Templates = make([]template, 0)
 
 	for c.Next() {

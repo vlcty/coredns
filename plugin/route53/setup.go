@@ -19,14 +19,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/route53/route53iface"
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("route53")
 
 func init() {
 	plugin.Register("route53",
-		func(c *caddy.Controller) error {
+		func(c *plugin.Controller) error {
 			f := func(credential *credentials.Credentials) route53iface.Route53API {
 				return route53.New(session.Must(session.NewSession(&aws.Config{
 					Credentials: credential,
@@ -37,7 +36,7 @@ func init() {
 	)
 }
 
-func setup(c *caddy.Controller, f func(*credentials.Credentials) route53iface.Route53API) error {
+func setup(c *plugin.Controller, f func(*credentials.Credentials) route53iface.Route53API) error {
 	for c.Next() {
 		keyPairs := map[string]struct{}{}
 		keys := map[string][]string{}

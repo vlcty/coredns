@@ -7,8 +7,6 @@ import (
 
 	"github.com/coredns/coredns/plugin"
 	clog "github.com/coredns/coredns/plugin/pkg/log"
-
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("pprof")
@@ -17,7 +15,7 @@ const defaultAddr = "localhost:6053"
 
 func init() { plugin.Register("pprof", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	h := &handler{addr: defaultAddr}
 
 	i := 0

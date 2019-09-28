@@ -9,7 +9,6 @@ import (
 	mwtls "github.com/coredns/coredns/plugin/pkg/tls"
 	"github.com/coredns/coredns/plugin/pkg/upstream"
 
-	"github.com/caddyserver/caddy"
 	etcdcv3 "go.etcd.io/etcd/clientv3"
 )
 
@@ -17,7 +16,7 @@ var log = clog.NewWithPlugin("etcd")
 
 func init() { plugin.Register("etcd", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	e, err := etcdParse(c)
 	if err != nil {
 		return plugin.Error("etcd", err)
@@ -31,7 +30,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func etcdParse(c *caddy.Controller) (*Etcd, error) {
+func etcdParse(c *plugin.Controller) (*Etcd, error) {
 	etc := Etcd{PathPrefix: "skydns"}
 	var (
 		tlsConfig *tls.Config

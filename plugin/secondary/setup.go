@@ -6,13 +6,11 @@ import (
 	"github.com/coredns/coredns/plugin/file"
 	"github.com/coredns/coredns/plugin/pkg/parse"
 	"github.com/coredns/coredns/plugin/pkg/upstream"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("secondary", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	zones, err := secondaryParse(c)
 	if err != nil {
 		return plugin.Error("secondary", err)
@@ -41,7 +39,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func secondaryParse(c *caddy.Controller) (file.Zones, error) {
+func secondaryParse(c *plugin.Controller) (file.Zones, error) {
 	z := make(map[string]*file.Zone)
 	names := []string{}
 	upstr := upstream.New()

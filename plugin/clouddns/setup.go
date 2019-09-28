@@ -10,7 +10,6 @@ import (
 	clog "github.com/coredns/coredns/plugin/pkg/log"
 	"github.com/coredns/coredns/plugin/pkg/upstream"
 
-	"github.com/caddyserver/caddy"
 	gcp "google.golang.org/api/dns/v1"
 	"google.golang.org/api/option"
 )
@@ -19,7 +18,7 @@ var log = clog.NewWithPlugin("clouddns")
 
 func init() {
 	plugin.Register("clouddns",
-		func(c *caddy.Controller) error {
+		func(c *plugin.Controller) error {
 			f := func(ctx context.Context, opt option.ClientOption) (gcpDNS, error) {
 				var err error
 				var client *gcp.Service
@@ -37,7 +36,7 @@ func init() {
 	)
 }
 
-func setup(c *caddy.Controller, f func(ctx context.Context, opt option.ClientOption) (gcpDNS, error)) error {
+func setup(c *plugin.Controller, f func(ctx context.Context, opt option.ClientOption) (gcpDNS, error)) error {
 	for c.Next() {
 		keyPairs := map[string]struct{}{}
 		keys := map[string][]string{}

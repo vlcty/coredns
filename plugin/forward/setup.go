@@ -11,13 +11,11 @@ import (
 	"github.com/coredns/coredns/plugin/pkg/parse"
 	pkgtls "github.com/coredns/coredns/plugin/pkg/tls"
 	"github.com/coredns/coredns/plugin/pkg/transport"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("forward", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	f, err := parseForward(c)
 	if err != nil {
 		return plugin.Error("forward", err)
@@ -62,7 +60,7 @@ func (f *Forward) OnShutdown() error {
 // Close is a synonym for OnShutdown().
 func (f *Forward) Close() { f.OnShutdown() }
 
-func parseForward(c *caddy.Controller) (*Forward, error) {
+func parseForward(c *plugin.Controller) (*Forward, error) {
 	var (
 		f   *Forward
 		err error
@@ -81,7 +79,7 @@ func parseForward(c *caddy.Controller) (*Forward, error) {
 	return f, nil
 }
 
-func parseStanza(c *caddy.Controller) (*Forward, error) {
+func parseStanza(c *plugin.Controller) (*Forward, error) {
 	f := New()
 
 	if !c.Args(&f.from) {
@@ -126,7 +124,7 @@ func parseStanza(c *caddy.Controller) (*Forward, error) {
 	return f, nil
 }
 
-func parseBlock(c *caddy.Controller, f *Forward) error {
+func parseBlock(c *plugin.Controller, f *Forward) error {
 	switch c.Val() {
 	case "except":
 		ignore := c.RemainingArgs()

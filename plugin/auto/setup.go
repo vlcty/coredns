@@ -12,15 +12,13 @@ import (
 	clog "github.com/coredns/coredns/plugin/pkg/log"
 	"github.com/coredns/coredns/plugin/pkg/parse"
 	"github.com/coredns/coredns/plugin/pkg/upstream"
-
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("auto")
 
 func init() { plugin.Register("auto", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	a, err := autoParse(c)
 	if err != nil {
 		return plugin.Error("auto", err)
@@ -70,7 +68,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func autoParse(c *caddy.Controller) (Auto, error) {
+func autoParse(c *plugin.Controller) (Auto, error) {
 	nilInterval := -1 * time.Second
 	var a = Auto{
 		loader: loader{

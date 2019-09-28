@@ -4,13 +4,12 @@ package parse
 import (
 	"fmt"
 
+	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/pkg/transport"
-
-	"github.com/caddyserver/caddy"
 )
 
 // Transfer parses transfer statements: 'transfer [to|from] [address...]'.
-func Transfer(c *caddy.Controller, secondary bool) (tos, froms []string, err error) {
+func Transfer(c *plugin.Controller, secondary bool) (tos, froms []string, err error) {
 	if !c.NextArg() {
 		return nil, nil, c.ArgErr()
 	}

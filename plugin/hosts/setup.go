@@ -11,8 +11,6 @@ import (
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/metrics"
 	clog "github.com/coredns/coredns/plugin/pkg/log"
-
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("hosts")
@@ -40,7 +38,7 @@ func periodicHostsUpdate(h *Hosts) chan bool {
 	return parseChan
 }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	h, err := hostsParse(c)
 	if err != nil {
 		return plugin.Error("hosts", err)
@@ -72,7 +70,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func hostsParse(c *caddy.Controller) (Hosts, error) {
+func hostsParse(c *plugin.Controller) (Hosts, error) {
 	config := dnsserver.GetConfig(c)
 
 	h := Hosts{

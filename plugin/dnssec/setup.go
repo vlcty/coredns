@@ -11,15 +11,13 @@ import (
 	"github.com/coredns/coredns/plugin/metrics"
 	"github.com/coredns/coredns/plugin/pkg/cache"
 	clog "github.com/coredns/coredns/plugin/pkg/log"
-
-	"github.com/caddyserver/caddy"
 )
 
 var log = clog.NewWithPlugin("dnssec")
 
 func init() { plugin.Register("dnssec", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	zones, keys, capacity, splitkeys, err := dnssecParse(c)
 	if err != nil {
 		return plugin.Error("dnssec", err)
@@ -38,7 +36,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func dnssecParse(c *caddy.Controller) ([]string, []*DNSKEY, int, bool, error) {
+func dnssecParse(c *plugin.Controller) ([]string, []*DNSKEY, int, bool, error) {
 	zones := []string{}
 
 	keys := []*DNSKEY{}
@@ -118,7 +116,7 @@ func dnssecParse(c *caddy.Controller) ([]string, []*DNSKEY, int, bool, error) {
 	return zones, keys, capacity, splitkeys, nil
 }
 
-func keyParse(c *caddy.Controller) ([]*DNSKEY, error) {
+func keyParse(c *plugin.Controller) ([]*DNSKEY, error) {
 	keys := []*DNSKEY{}
 	config := dnsserver.GetConfig(c)
 

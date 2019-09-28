@@ -3,13 +3,11 @@ package metadata
 import (
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("metadata", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	m, err := metadataParse(c)
 	if err != nil {
 		return err
@@ -32,7 +30,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func metadataParse(c *caddy.Controller) (*Metadata, error) {
+func metadataParse(c *plugin.Controller) (*Metadata, error) {
 	m := &Metadata{}
 	c.Next()
 	zones := c.RemainingArgs()

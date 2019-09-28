@@ -5,13 +5,11 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("ready", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	addr, err := parse(c)
 	if err != nil {
 		return plugin.Error("ready", err)
@@ -48,7 +46,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (string, error) {
+func parse(c *plugin.Controller) (string, error) {
 	addr := ":8181"
 	i := 0
 	for c.Next() {

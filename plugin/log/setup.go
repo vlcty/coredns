@@ -8,13 +8,12 @@ import (
 	"github.com/coredns/coredns/plugin/pkg/replacer"
 	"github.com/coredns/coredns/plugin/pkg/response"
 
-	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 )
 
 func init() { plugin.Register("log", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	rules, err := logParse(c)
 	if err != nil {
 		return plugin.Error("log", err)
@@ -27,7 +26,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func logParse(c *caddy.Controller) ([]Rule, error) {
+func logParse(c *plugin.Controller) ([]Rule, error) {
 	var rules []Rule
 
 	for c.Next() {

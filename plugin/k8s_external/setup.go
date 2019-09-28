@@ -5,13 +5,11 @@ import (
 
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("k8s_external", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	e, err := parse(c)
 	if err != nil {
 		return plugin.Error("k8s_external", err)
@@ -38,7 +36,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (*External, error) {
+func parse(c *plugin.Controller) (*External, error) {
 	e := New()
 
 	for c.Next() { // external

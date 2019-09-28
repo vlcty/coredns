@@ -9,13 +9,12 @@ import (
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
 
-	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 )
 
 func init() { plugin.Register("cancel", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	ca := Cancel{timeout: 5001 * time.Millisecond}
 
 	for c.Next() {

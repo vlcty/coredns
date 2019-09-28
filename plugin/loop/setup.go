@@ -9,13 +9,11 @@ import (
 	"github.com/coredns/coredns/core/dnsserver"
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/pkg/dnsutil"
-
-	"github.com/caddyserver/caddy"
 )
 
 func init() { plugin.Register("loop", setup) }
 
-func setup(c *caddy.Controller) error {
+func setup(c *plugin.Controller) error {
 	l, err := parse(c)
 	if err != nil {
 		return plugin.Error("loop", err)
@@ -58,7 +56,7 @@ func setup(c *caddy.Controller) error {
 	return nil
 }
 
-func parse(c *caddy.Controller) (*Loop, error) {
+func parse(c *plugin.Controller) (*Loop, error) {
 	i := 0
 	zone := "."
 	for c.Next() {
