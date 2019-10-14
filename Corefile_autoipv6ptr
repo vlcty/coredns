@@ -1,0 +1,14 @@
+0.0.0.b.0.0.3.0.8.b.d.0.1.0.0.2.ip6.arpa:533 {
+    log
+    autoipv6ptr {
+        suffix lan.mydomain.tld
+    }
+}
+
+1.0.0.b.0.0.3.0.8.b.d.0.1.0.0.2.ip6.arpa:533 {
+    log
+    autoipv6ptr {
+        suffix servers.mydomain.tld
+        presetsfile Presets_autoipv6ptr
+    }
+}
