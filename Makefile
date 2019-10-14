@@ -16,6 +16,10 @@ all: coredns
 coredns: $(CHECKS)
 	CGO_ENABLED=$(CGO_ENABLED) $(SYSTEM) go build $(BUILDOPTS) -ldflags="-s -w -X github.com/coredns/coredns/coremain.GitCommit=$(GITCOMMIT)" -o $(BINARY)
 
+.PHONY: amd64
+amd64:
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) $(SYSTEM) go build $(BUILDOPTS) -ldflags="-s -w -X github.com/coredns/coredns/coremain.GitCommit=$(GITCOMMIT)" -o $(BINARY)
+
 .PHONY: check
 check: presubmit core/plugin/zplugin.go core/dnsserver/zdirectives.go
 
