@@ -10,5 +10,6 @@
     autoipv6ptr {
         suffix servers.mydomain.tld
         presetsfile Presets_autoipv6ptr
+        ttl 10
     }
 }
