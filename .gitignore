@@ -15,3 +15,4 @@ coverage.txt
 .settings/**
 build/
 release/
+plugin/autoipv6ptr
