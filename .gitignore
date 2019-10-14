@@ -16,3 +16,5 @@ coverage.txt
 build/
 release/
 plugin/autoipv6ptr
+core/dnsserver/zdirectives.go
+core/plugin/zplugin.go
