@@ -11,7 +11,7 @@ require (
 	github.com/DataDog/datadog-go v2.2.0+incompatible // indirect
 	github.com/Shopify/sarama v1.21.0 // indirect
 	github.com/apache/thrift v0.12.0 // indirect
-	github.com/aws/aws-sdk-go v1.25.16
+	github.com/aws/aws-sdk-go v1.25.19
 	github.com/caddyserver/caddy v1.0.3
 	github.com/coredns/federation v0.0.0-20190818181423-e032b096babe
 	github.com/coreos/go-systemd v0.0.0-20190212144455-93d5ec2c7f76 // indirect
@@ -43,10 +43,10 @@ require (
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc
 	golang.org/x/net v0.0.0-20191003171128-d98b1b443823 // indirect
 	golang.org/x/sys v0.0.0-20191003212358-c178f38b412c
-	google.golang.org/api v0.11.0
+	google.golang.org/api v0.13.0
 	google.golang.org/genproto v0.0.0-20190701230453-710ae3a149df // indirect
 	google.golang.org/grpc v1.24.0
-	gopkg.in/DataDog/dd-trace-go.v1 v1.18.0
+	gopkg.in/DataDog/dd-trace-go.v1 v1.19.0
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/api v0.0.0-20190620084959-7cf5895f2711
 	k8s.io/apimachinery v0.0.0-20190612205821-1799e75a0719
