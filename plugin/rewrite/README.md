@@ -37,6 +37,8 @@ will behave as follows:
    * `continue` will continue applying the next rule in the rule list.
    * `stop` will consider the current rule the last rule and will not continue.  The default behaviour is `stop`
 
+## Examples
+
 ### Name Field Rewrites
 
 The `rewrite` plugin offers the ability to match the name in the question section of
@@ -114,13 +116,6 @@ rather from `service.us-west-1.consul`.
 ```
 $ dig @10.1.1.1 ftp-us-west-1.coredns.rocks
 
-; <<>> DiG 9.8.3-P1 <<>> @10.1.1.1 ftp-us-west-1.coredns.rocks
-; (1 server found)
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 8619
-;; flags: qr aa rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 0
-
 ;; QUESTION SECTION:
 ;ftp-us-west-1.coredns.rocks. IN A
 
@@ -146,13 +141,6 @@ Now, the `ANSWER SECTION` matches the `QUESTION SECTION`:
 
 ```
 $ dig @10.1.1.1 ftp-us-west-1.coredns.rocks
-
-; <<>> DiG 9.8.3-P1 <<>> @10.1.1.1 ftp-us-west-1.coredns.rocks
-; (1 server found)
-;; global options: +cmd
-;; Got answer:
-;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 8619
-;; flags: qr aa rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 0
 
 ;; QUESTION SECTION:
 ;ftp-us-west-1.coredns.rocks. IN A

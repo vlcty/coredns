@@ -55,7 +55,7 @@ kubernetes [ZONES...] {
    If this option is omitted all namespaces are exposed
 * `namespace_labels` **EXPRESSION** only expose the records for Kubernetes namespaces that match this label selector.
    The label selector syntax is described in the
-   [Kubernetes User Guide - Labels](http://kubernetes.io/docs/user-guide/labels/). An example that
+   [Kubernetes User Guide - Labels](https://kubernetes.io/docs/user-guide/labels/). An example that
    only exposes namespaces labeled as "istio-injection=enabled", would use:
    `labels istio-injection=enabled`.
 * `labels` **EXPRESSION** only exposes the records for Kubernetes objects that match this label selector.
@@ -173,7 +173,8 @@ upstreamNameservers: |
 
 The *kubernetes* plugin can be used in conjunction with the *autopath* plugin.  Using this
 feature enables server-side domain search path completion in Kubernetes clusters.  Note: `pods` must
-be set to `verified` for this to function properly.
+be set to `verified` for this to function properly. Furthermore, the remote IP address in the DNS
+packet received by CoreDNS must be the IP address of the Pod that sent the request.
 
     cluster.local {
         autopath @kubernetes
@@ -181,20 +182,6 @@ be set to `verified` for this to function properly.
             pods verified
         }
     }
-
-## Federation
-
-The *kubernetes* plugin can be used in conjunction with the *federation* plugin.  Using this
-feature enables serving federated domains from the Kubernetes clusters.
-
-    cluster.local {
-        federation {
-            prod prod.example.org
-            staging staging.example.org
-        }
-        kubernetes
-    }
-
 
 ## Wildcards
 
@@ -220,14 +207,20 @@ or the word "any"), then that label will match all values.  The labels that acce
 The kubernetes plugin will publish the following metadata, if the *metadata*
 plugin is also enabled:
 
- * kubernetes/endpoint: the endpoint name in the query
- * kubernetes/kind: the resource kind (pod or svc) in the query
- * kubernetes/namespace: the namespace in the query
- * kubernetes/port-name: the port name in an SRV query
- * kubernetes/protocol: the protocol in an SRV query
- * kubernetes/service: the service name in the query
- * kubernetes/client-namespace: the client pod's namespace, if `pods verified` mode is enabled
- * kubernetes/client-pod-name: the client pod's name, if `pods verified` mode is enabled
+ * `kubernetes/endpoint`: the endpoint name in the query
+ * `kubernetes/kind`: the resource kind (pod or svc) in the query
+ * `kubernetes/namespace`: the namespace in the query
+ * `kubernetes/port-name`: the port name in an SRV query
+ * `kubernetes/protocol`: the protocol in an SRV query
+ * `kubernetes/service`: the service name in the query
+ * `kubernetes/client-namespace`: the client pod's namespace (see requirements below)
+ * `kubernetes/client-pod-name`: the client pod's name (see requirements below)
+
+The `kubernetes/client-namespace` and `kubernetes/client-pod-name` metadata work by reconciling the
+client IP address in the DNS request packet to a known pod IP address. Therefore the following is required:
+ * `pods verified` mode must be enabled
+ * the remote IP address in the DNS packet received by CoreDNS must be the IP address
+   of the Pod that sent the request.
 
 ## Metrics
 
@@ -244,4 +237,4 @@ If monitoring is enabled (via the *prometheus* plugin) then the following metric
 
 ## Bugs
 
-The duration metric only supports the "headless_with_selector" service currently.
+The duration metric only supports the "headless\_with\_selector" service currently.

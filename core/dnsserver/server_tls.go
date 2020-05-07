@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/coredns/coredns/plugin/pkg/reuseport"
 	"github.com/coredns/coredns/plugin/pkg/transport"
 
+	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 )
 
@@ -34,6 +36,9 @@ func NewServerTLS(addr string, group []*Config) (*ServerTLS, error) {
 	return &ServerTLS{Server: s, tlsConfig: tlsConfig}, nil
 }
 
+// Compile-time check to ensure Server implements the caddy.GracefulServer interface
+var _ caddy.GracefulServer = &Server{}
+
 // Serve implements caddy.TCPServer interface.
 func (s *ServerTLS) Serve(l net.Listener) error {
 	s.m.Lock()
@@ -57,7 +62,7 @@ func (s *ServerTLS) ServePacket(p net.PacketConn) error { return nil }
 
 // Listen implements caddy.TCPServer interface.
 func (s *ServerTLS) Listen() (net.Listener, error) {
-	l, err := net.Listen("tcp", s.Addr[len(transport.TLS+"://"):])
+	l, err := reuseport.Listen("tcp", s.Addr[len(transport.TLS+"://"):])
 	if err != nil {
 		return nil, err
 	}

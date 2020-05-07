@@ -8,10 +8,12 @@
 # These are published on coredns.io. For example see: notes/coredns-1.5.1.md
 #
 # Getting the authors for this release is done with the following command line
+# See the 'authors' target.
 #
-# git log --pretty=format:'%an' v$(VERSION)..master | sort -u
+# git log --pretty=format:'%an' $(git describe --tags --abbrev=0)..master | sort -u
 #
 # Getting all pull requests merged since the last tag can be done with this "oneliner"
+# See the 'prs' target.
 #
 # % git log $(git describe --tags --abbrev=0)..HEAD --oneline | awk ' { $1="";print } ' | sed 's/^ //' | sed -e 's|#\([0-9]\)|https://github.com/coredns/coredns/pull/\1|'
 #
@@ -31,10 +33,10 @@
 # Then:
 #
 # 1. Open an issue for this release
-# 2. In an issue give the command: /release: master VERSION
+# 2. In an issue give the command: /release master VERSION
 #    Where VERSION is the version of the release - the release script double checks this with the
 #    actual CoreDNS version in coremain/version.go
-# 3. (to test as release /release: -t master VERSION can be used.
+# 3. (to test as release /release -t master VERSION can be used.
 #
 # See https://github.com/coredns/release for documentation README on what needs to be setup for this to be
 # automated (can still be done by hand if needed). Especially what environment variables need to be
@@ -88,6 +90,8 @@ build:
 	mkdir -p build/windows/amd64 && $(MAKE) coredns BINARY=build/windows/amd64/$(NAME).exe SYSTEM="GOOS=windows GOARCH=amd64" CHECKS="" BUILDOPTS=""
 	@echo Building: linux/mips - $(VERSION)
 	mkdir -p build/linux/mips  && $(MAKE) coredns BINARY=build/linux/mips/$(NAME) SYSTEM="GOOS=linux GOARCH=mips" CHECKS="" BUILDOPTS=""
+	@echo Building: linux/mips64le - $(VERSION)
+	mkdir -p build/linux/mips64le  && $(MAKE) coredns BINARY=build/linux/mips64le/$(NAME) SYSTEM="GOOS=linux GOARCH=mips64le" CHECKS="" BUILDOPTS=""
 	@echo Building: linux/$(LINUX_ARCH) - $(VERSION) ;\
 	for arch in $(LINUX_ARCH); do \
 	    mkdir -p build/linux/$$arch  && $(MAKE) coredns BINARY=build/linux/$$arch/$(NAME) SYSTEM="GOOS=linux GOARCH=$$arch" CHECKS="" BUILDOPTS="" ;\
@@ -100,6 +104,7 @@ tar:
 	tar -zcf release/$(NAME)_$(VERSION)_darwin_amd64.tgz -C build/darwin/amd64 $(NAME)
 	tar -zcf release/$(NAME)_$(VERSION)_windows_amd64.tgz -C build/windows/amd64 $(NAME).exe
 	tar -zcf release/$(NAME)_$(VERSION)_linux_mips.tgz -C build/linux/mips $(NAME)
+	tar -zcf release/$(NAME)_$(VERSION)_linux_mips64le.tgz -C build/linux/mips64le $(NAME)
 	for arch in $(LINUX_ARCH); do \
 	    tar -zcf release/$(NAME)_$(VERSION)_linux_$$arch.tgz -C build/linux/$$arch $(NAME) ;\
 	done
@@ -107,14 +112,15 @@ tar:
 .PHONY: github-push
 github-push:
 	@echo Releasing: $(VERSION)
-	@$(eval RELEASE:=$(shell curl -s -d '{"tag_name": "v$(VERSION)", "name": "v$(VERSION)"}' "https://api.github.com/repos/$(GITHUB)/$(NAME)/releases?access_token=${GITHUB_ACCESS_TOKEN}" | grep -m 1 '"id"' | tr -cd '[[:digit:]]'))
+	@$(eval RELEASE:=$(shell curl -s -d '{"tag_name": "v$(VERSION)", "name": "v$(VERSION)"}' -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" "https://api.github.com/repos/$(GITHUB)/$(NAME)/releases" | grep -m 1 '"id"' | tr -cd '[[:digit:]]'))
 	@echo ReleaseID: $(RELEASE)
 	@( cd release; for asset in `ls -A *tgz`; do \
 	    echo $$asset; \
 	    curl -o /dev/null -X POST \
 	      -H "Content-Type: application/gzip" \
+	      -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
 	      --data-binary "@$$asset" \
-	      "https://uploads.github.com/repos/$(GITHUB)/$(NAME)/releases/$(RELEASE)/assets?name=$${asset}&access_token=${GITHUB_ACCESS_TOKEN}" ; \
+	      "https://uploads.github.com/repos/$(GITHUB)/$(NAME)/releases/$(RELEASE)/assets?name=$${asset}" ; \
 	done )
 	@( cd release; for asset in `ls -A *tgz`; do \
 	    sha256sum $$asset > $$asset.sha256; \
@@ -123,8 +129,9 @@ github-push:
 	    echo $$asset; \
 	    curl -o /dev/null -X POST \
 	      -H "Content-Type: text/plain" \
+	      -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" \
 	      --data-binary "@$$asset" \
-	      "https://uploads.github.com/repos/$(GITHUB)/$(NAME)/releases/$(RELEASE)/assets?name=$${asset}&access_token=${GITHUB_ACCESS_TOKEN}" ; \
+	      "https://uploads.github.com/repos/$(GITHUB)/$(NAME)/releases/$(RELEASE)/assets?name=$${asset}" ; \
 	done )
 
 .PHONY: docker-build
@@ -159,3 +166,13 @@ version:
 clean:
 	rm -rf release
 	rm -rf build
+
+.PHONY: prs
+prs:
+	git log $$(git describe --tags --abbrev=0)..HEAD --oneline | awk ' { $$1="";print } ' | sed 's/^ //' | sed -e 's|#\([0-9]\)|https://github.com/coredns/coredns/pull/\1|' | \
+		grep -v '^build(deps)' | \
+		grep -v '^auto go mod tidy'
+
+.PHONY: authors
+authors:
+	git log --pretty=format:'%an' $$(git describe --tags --abbrev=0)..master | sort -u

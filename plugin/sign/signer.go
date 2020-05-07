@@ -18,18 +18,15 @@ var log = clog.NewWithPlugin("sign")
 
 // Signer holds the data needed to sign a zone file.
 type Signer struct {
-	keys      []Pair
-	origin    string
-	dbfile    string
-	directory string
-	jitter    time.Duration
+	keys        []Pair
+	origin      string
+	dbfile      string
+	directory   string
+	jitterIncep time.Duration
+	jitterExpir time.Duration
 
 	signedfile string
 	stop       chan struct{}
-
-	expiration uint32
-	inception  uint32
-	ttl        uint32
 }
 
 // Sign signs a zone file according to the parameters in s.
@@ -44,46 +41,31 @@ func (s *Signer) Sign(now time.Time) (*file.Zone, error) {
 		return nil, err
 	}
 
-	s.inception, s.expiration = lifetime(now, s.jitter)
-
-	s.ttl = z.Apex.SOA.Header().Ttl
+	mttl := z.Apex.SOA.Minttl
+	ttl := z.Apex.SOA.Header().Ttl
+	inception, expiration := lifetime(now, s.jitterIncep, s.jitterExpir)
 	z.Apex.SOA.Serial = uint32(now.Unix())
 
 	for _, pair := range s.keys {
-		pair.Public.Header().Ttl = s.ttl // set TTL on key so it matches the RRSIG.
+		pair.Public.Header().Ttl = ttl // set TTL on key so it matches the RRSIG.
 		z.Insert(pair.Public)
-		z.Insert(pair.Public.ToDS(dns.SHA1))
-		z.Insert(pair.Public.ToDS(dns.SHA256))
 		z.Insert(pair.Public.ToDS(dns.SHA1).ToCDS())
 		z.Insert(pair.Public.ToDS(dns.SHA256).ToCDS())
 		z.Insert(pair.Public.ToCDNSKEY())
 	}
 
-	names, apex := names(s.origin, z)
+	names := names(s.origin, z)
 	ln := len(names)
 
-	var nsec *dns.NSEC
-	if apex {
-		nsec = NSEC(s.origin, names[(ln+1)%ln], s.ttl, []uint16{dns.TypeSOA, dns.TypeNS, dns.TypeRRSIG, dns.TypeNSEC})
-		z.Insert(nsec)
-	}
-
 	for _, pair := range s.keys {
-		rrsig, err := pair.signRRs([]dns.RR{z.Apex.SOA}, s.origin, s.ttl, s.inception, s.expiration)
+		rrsig, err := pair.signRRs([]dns.RR{z.Apex.SOA}, s.origin, ttl, inception, expiration)
 		if err != nil {
 			return nil, err
 		}
 		z.Insert(rrsig)
 		// NS apex may not be set if RR's have been discarded because the origin doesn't match.
 		if len(z.Apex.NS) > 0 {
-			rrsig, err = pair.signRRs(z.Apex.NS, s.origin, s.ttl, s.inception, s.expiration)
-			if err != nil {
-				return nil, err
-			}
-			z.Insert(rrsig)
-		}
-		if apex {
-			rrsig, err = pair.signRRs([]dns.RR{nsec}, s.origin, s.ttl, s.inception, s.expiration)
+			rrsig, err = pair.signRRs(z.Apex.NS, s.origin, ttl, inception, expiration)
 			if err != nil {
 				return nil, err
 			}
@@ -93,21 +75,27 @@ func (s *Signer) Sign(now time.Time) (*file.Zone, error) {
 
 	// We are walking the tree in the same direction, so names[] can be used here to indicated the next element.
 	i := 1
-	err = z.Walk(func(e *tree.Elem, zrrs map[uint16][]dns.RR) error {
-		if !apex && e.Name() == s.origin {
-			nsec := NSEC(e.Name(), names[(ln+i)%ln], s.ttl, append(e.Types(), dns.TypeNS, dns.TypeSOA, dns.TypeNSEC, dns.TypeRRSIG))
+	err = z.AuthWalk(func(e *tree.Elem, zrrs map[uint16][]dns.RR, auth bool) error {
+		if !auth {
+			return nil
+		}
+
+		if e.Name() == s.origin {
+			nsec := NSEC(e.Name(), names[(ln+i)%ln], mttl, append(e.Types(), dns.TypeNS, dns.TypeSOA, dns.TypeRRSIG, dns.TypeNSEC))
 			z.Insert(nsec)
 		} else {
-			nsec := NSEC(e.Name(), names[(ln+i)%ln], s.ttl, append(e.Types(), dns.TypeNSEC, dns.TypeRRSIG))
+			nsec := NSEC(e.Name(), names[(ln+i)%ln], mttl, append(e.Types(), dns.TypeRRSIG, dns.TypeNSEC))
 			z.Insert(nsec)
 		}
 
 		for t, rrs := range zrrs {
-			if t == dns.TypeRRSIG {
+			// RRSIGs are not signed and NS records are not signed because we are never authoratiative for them.
+			// The zone's apex nameservers records are not kept in this tree and are signed separately.
+			if t == dns.TypeRRSIG || t == dns.TypeNS {
 				continue
 			}
 			for _, pair := range s.keys {
-				rrsig, err := pair.signRRs(rrs, s.origin, s.ttl, s.inception, s.expiration)
+				rrsig, err := pair.signRRs(rrs, s.origin, rrs[0].Header().Ttl, inception, expiration)
 				if err != nil {
 					return err
 				}
@@ -156,8 +144,8 @@ func resign(rd io.Reader, now time.Time) (why error) {
 			}
 			incep, _ := time.Parse("20060102150405", dns.TimeToString(x.Inception))
 			// If too long ago, resign.
-			if now.Sub(incep) >= 0 && now.Sub(incep) > DurationResignDays {
-				return fmt.Errorf("inception %q was more than: %s ago from %s: %s", incep.Format(timeFmt), DurationResignDays, now.Format(timeFmt), now.Sub(incep))
+			if now.Sub(incep) >= 0 && now.Sub(incep) > durationResignDays {
+				return fmt.Errorf("inception %q was more than: %s ago from %s: %s", incep.Format(timeFmt), durationResignDays, now.Format(timeFmt), now.Sub(incep))
 			}
 			// Inception hasn't even start yet.
 			if now.Sub(incep) < 0 {
@@ -165,8 +153,8 @@ func resign(rd io.Reader, now time.Time) (why error) {
 			}
 
 			expire, _ := time.Parse("20060102150405", dns.TimeToString(x.Expiration))
-			if expire.Sub(now) < DurationExpireDays {
-				return fmt.Errorf("expiration %q is less than: %s away from %s: %s", expire.Format(timeFmt), DurationExpireDays, now.Format(timeFmt), expire.Sub(now))
+			if expire.Sub(now) < durationExpireDays {
+				return fmt.Errorf("expiration %q is less than: %s away from %s: %s", expire.Format(timeFmt), durationExpireDays, now.Format(timeFmt), expire.Sub(now))
 			}
 		}
 		i++
@@ -186,7 +174,7 @@ func signAndLog(s *Signer, why error) {
 	z, err := s.Sign(now)
 	log.Infof("Signing %q because %s", s.origin, why)
 	if err != nil {
-		log.Warningf("Error signing %q with key tags %q in %s: %s, next: %s", s.origin, keyTag(s.keys), time.Since(now), err, now.Add(DurationRefreshHours).Format(timeFmt))
+		log.Warningf("Error signing %q with key tags %q in %s: %s, next: %s", s.origin, keyTag(s.keys), time.Since(now), err, now.Add(durationRefreshHours).Format(timeFmt))
 		return
 	}
 
@@ -194,7 +182,7 @@ func signAndLog(s *Signer, why error) {
 		log.Warningf("Error signing %q: failed to move zone file into place: %s", s.origin, err)
 		return
 	}
-	log.Infof("Successfully signed zone %q in %q with key tags %q and %d SOA serial, elapsed %f, next: %s", s.origin, filepath.Join(s.directory, s.signedfile), keyTag(s.keys), z.Apex.SOA.Serial, time.Since(now).Seconds(), now.Add(DurationRefreshHours).Format(timeFmt))
+	log.Infof("Successfully signed zone %q in %q with key tags %q and %d SOA serial, elapsed %f, next: %s", s.origin, filepath.Join(s.directory, s.signedfile), keyTag(s.keys), z.Apex.SOA.Serial, time.Since(now).Seconds(), now.Add(durationRefreshHours).Format(timeFmt))
 }
 
 // refresh checks every val if some zones need to be resigned.
@@ -215,8 +203,8 @@ func (s *Signer) refresh(val time.Duration) {
 	}
 }
 
-func lifetime(now time.Time, jitter time.Duration) (uint32, uint32) {
-	incep := uint32(now.Add(DurationSignatureInceptionHours).Add(jitter).Unix())
-	expir := uint32(now.Add(DurationSignatureExpireDays).Unix())
+func lifetime(now time.Time, jitterInception, jitterExpiration time.Duration) (uint32, uint32) {
+	incep := uint32(now.Add(durationSignatureInceptionHours).Add(jitterInception).Unix())
+	expir := uint32(now.Add(durationSignatureExpireDays).Add(jitterExpiration).Unix())
 	return incep, expir
 }

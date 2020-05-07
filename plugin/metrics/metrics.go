@@ -10,6 +10,7 @@ import (
 
 	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/metrics/vars"
+	"github.com/coredns/coredns/plugin/pkg/reuseport"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -50,7 +51,6 @@ func New(addr string) *Metrics {
 	met.MustRegister(vars.RequestDuration)
 	met.MustRegister(vars.RequestSize)
 	met.MustRegister(vars.RequestDo)
-	met.MustRegister(vars.RequestType)
 	met.MustRegister(vars.ResponseSize)
 	met.MustRegister(vars.ResponseRcode)
 	met.MustRegister(vars.PluginEnabled)
@@ -95,7 +95,7 @@ func (m *Metrics) ZoneNames() []string {
 
 // OnStartup sets up the metrics on startup.
 func (m *Metrics) OnStartup() error {
-	ln, err := net.Listen("tcp", m.Addr)
+	ln, err := reuseport.Listen("tcp", m.Addr)
 	if err != nil {
 		log.Errorf("Failed to start metrics handler: %s", err)
 		return err

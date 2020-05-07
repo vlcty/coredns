@@ -1,6 +1,7 @@
 package kubernetes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -19,35 +20,30 @@ import (
 	"github.com/caddyserver/caddy"
 	"github.com/miekg/dns"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	// Pull this in setting klog's output to stdout
-	"k8s.io/klog"
-
-	// Excluding azure because it is failing to compile
-	// pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	// pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
-	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
-	// pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
-	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"       // pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
+	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"      // pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
+	_ "k8s.io/client-go/plugin/pkg/client/auth/openstack" // pull this in here, because we want it excluded if plugin.cfg doesn't have k8s
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/klog"
 )
 
-var log = clog.NewWithPlugin("kubernetes")
+const pluginName = "kubernetes"
 
-func init() { plugin.Register("kubernetes", setup) }
+var log = clog.NewWithPlugin(pluginName)
+
+func init() { plugin.Register(pluginName, setup) }
 
 func setup(c *caddy.Controller) error {
 	klog.SetOutput(os.Stdout)
 
 	k, err := kubernetesParse(c)
 	if err != nil {
-		return plugin.Error("kubernetes", err)
+		return plugin.Error(pluginName, err)
 	}
 
-	err = k.InitKubeCache()
+	err = k.InitKubeCache(context.Background())
 	if err != nil {
-		return plugin.Error("kubernetes", err)
+		return plugin.Error(pluginName, err)
 	}
 
 	k.RegisterKubeCache(c)
@@ -206,8 +202,6 @@ func ParseStanza(c *caddy.Controller) (*Kubernetes, error) {
 				continue
 			}
 			return nil, c.ArgErr()
-		case "resyncperiod":
-			continue
 		case "labels":
 			args := c.RemainingArgs()
 			if len(args) > 0 {
@@ -234,9 +228,6 @@ func ParseStanza(c *caddy.Controller) (*Kubernetes, error) {
 			return nil, c.ArgErr()
 		case "fallthrough":
 			k8s.Fall.SetZonesFromArgs(c.RemainingArgs())
-		case "upstream":
-			// remove soon
-			c.RemainingArgs() // eat remaining args
 		case "ttl":
 			args := c.RemainingArgs()
 			if len(args) == 0 {

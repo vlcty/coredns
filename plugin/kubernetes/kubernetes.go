@@ -69,7 +69,7 @@ const (
 	// podModeInsecure is where pod requests are answered without verifying they exist
 	podModeInsecure = "insecure"
 	// DNSSchemaVersion is the schema version: https://github.com/kubernetes/dns/blob/master/docs/specification.md
-	DNSSchemaVersion = "1.0.1"
+	DNSSchemaVersion = "1.1.0"
 	// Svc is the DNS schema for kubernetes services
 	Svc = "svc"
 	// Pod is the DNS schema for kubernetes pods
@@ -212,7 +212,7 @@ func (k *Kubernetes) getClientConfig() (*rest.Config, error) {
 }
 
 // InitKubeCache initializes a new Kubernetes cache.
-func (k *Kubernetes) InitKubeCache() (err error) {
+func (k *Kubernetes) InitKubeCache(ctx context.Context) (err error) {
 	config, err := k.getClientConfig()
 	if err != nil {
 		return err
@@ -245,14 +245,14 @@ func (k *Kubernetes) InitKubeCache() (err error) {
 
 	k.opts.zones = k.Zones
 	k.opts.endpointNameMode = k.endpointNameMode
-	k.APIConn = newdnsController(kubeClient, k.opts)
+	k.APIConn = newdnsController(ctx, kubeClient, k.opts)
 
 	return err
 }
 
 // Records looks up services in kubernetes.
 func (k *Kubernetes) Records(ctx context.Context, state request.Request, exact bool) ([]msg.Service, error) {
-	r, e := parseRequest(state)
+	r, e := parseRequest(state.Name(), state.Zone)
 	if e != nil {
 		return nil, e
 	}
