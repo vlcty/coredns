@@ -4,7 +4,7 @@ package plugin
 
 import (
 	// Include all plugins.
-	_ "github.com/caddyserver/caddy/onevent"
+	_ "github.com/coredns/caddy/onevent"
 	_ "github.com/coredns/coredns/plugin/acl"
 	_ "github.com/coredns/coredns/plugin/any"
 	_ "github.com/coredns/coredns/plugin/auto"
@@ -31,6 +31,7 @@ import (
 	_ "github.com/coredns/coredns/plugin/k8s_external"
 	_ "github.com/coredns/coredns/plugin/kubernetes"
 	_ "github.com/coredns/coredns/plugin/loadbalance"
+	_ "github.com/coredns/coredns/plugin/local"
 	_ "github.com/coredns/coredns/plugin/log"
 	_ "github.com/coredns/coredns/plugin/loop"
 	_ "github.com/coredns/coredns/plugin/metadata"

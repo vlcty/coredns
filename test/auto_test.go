@@ -16,11 +16,12 @@ func TestAuto(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.RemoveAll(tmpdir)
 
 	corefile := `org:0 {
 		auto {
 			directory ` + tmpdir + ` db\.(.*) {1}
-			reload 1s
+			reload 0.01s
 		}
 	}`
 
@@ -45,7 +46,7 @@ func TestAuto(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(1500 * time.Millisecond) // wait for it to be picked up
+	time.Sleep(50 * time.Millisecond) // wait for it to be picked up
 
 	resp, err = dns.Exchange(m, udp)
 	if err != nil {
@@ -58,7 +59,7 @@ func TestAuto(t *testing.T) {
 	// Remove db.example.org again.
 	os.Remove(filepath.Join(tmpdir, "db.example.org"))
 
-	time.Sleep(1100 * time.Millisecond) // wait for it to be picked up
+	time.Sleep(50 * time.Millisecond) // wait for it to be picked up
 	resp, err = dns.Exchange(m, udp)
 	if err != nil {
 		t.Fatal("Expected to receive reply, but didn't")
@@ -74,11 +75,12 @@ func TestAutoNonExistentZone(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.RemoveAll(tmpdir)
 
 	corefile := `.:0 {
 		auto {
 			directory ` + tmpdir + ` (.*) {1}
-			reload 1s
+			reload 0.01s
 		}
 		errors stdout
 	}`
@@ -112,12 +114,15 @@ func TestAutoAXFR(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer os.RemoveAll(tmpdir)
 
 	corefile := `org:0 {
 		auto {
 			directory ` + tmpdir + ` db\.(.*) {1}
-			reload 1s
-			transfer to *
+			reload 0.01s
+		}
+		transfer {
+			to *
 		}
 	}`
 
@@ -137,7 +142,7 @@ func TestAutoAXFR(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(1100 * time.Millisecond) // wait for it to be picked up
+	time.Sleep(50 * time.Millisecond) // wait for it to be picked up
 
 	tr := new(dns.Transfer)
 	m := new(dns.Msg)
