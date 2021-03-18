@@ -101,13 +101,20 @@ On each endpoint, the timeouts for communication are set as follows:
 * The dial timeout by default is 30s, and can decrease automatically down to 100ms based on early results.
 * The read timeout is static at 2s.
 
+## Metadata
+
+The forward plugin will publish the following metadata, if the *metadata*
+plugin is also enabled:
+
+* `forward/upstream`: the upstream used to forward the request
+
 ## Metrics
 
 If monitoring is enabled (via the *prometheus* plugin) then the following metric are exported:
 
 * `coredns_forward_requests_total{to}` - query count per upstream.
 * `coredns_forward_responses_total{to}` - Counter of responses received per upstream.
-* `coredns_forward_request_duration_seconds{to}` - duration per upstream interaction.
+* `coredns_forward_request_duration_seconds{to, rcode, type}` - duration per upstream, RCODE, type
 * `coredns_forward_responses_total{to, rcode}` - count of RCODEs per upstream.
 * `coredns_forward_healthcheck_failures_total{to}` - number of failed health checks per upstream.
 * `coredns_forward_healthcheck_broken_total{}` - counter of when all upstreams are unhealthy,
